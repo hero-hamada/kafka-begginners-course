@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 
 public class ProducerDemoWithCallback {
     private static final String BOOSTRAP_SERVER = "127.0.0.1:9092";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProducerDemoWithCallback.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProducerDemoWithCallback.class.getName());
 
     public static void main(String[] args) {
         // create Producer properties https://kafka.apache.org/documentation/#producerconfigs

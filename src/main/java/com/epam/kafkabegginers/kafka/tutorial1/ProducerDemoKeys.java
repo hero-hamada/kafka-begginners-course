@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 
 public class ProducerDemoKeys {
     private static final String BOOSTRAP_SERVER = "127.0.0.1:9092";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProducerDemoKeys.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProducerDemoKeys.class.getName());
 
     public static void main(String[] args) {
         // create Producer properties https://kafka.apache.org/documentation/#producerconfigs
