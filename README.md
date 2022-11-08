@@ -13,3 +13,4 @@ To run console consumer:
 ```
 kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic first_topic --group my-third-application
 ```
+You can always use the latest version of kafka (Bi-Directional Compatibility)
