@@ -11,11 +11,16 @@ import com.twitter.hbc.core.endpoint.StatusesFilterEndpoint;
 import com.twitter.hbc.core.processor.StringDelimitedProcessor;
 import com.twitter.hbc.httpclient.auth.Authentication;
 import com.twitter.hbc.httpclient.auth.OAuth1;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +32,9 @@ public class TwitterProducer {
     private static final String CONSUMER_SECRET = "";
     private static final String TOKEN = "";
     private static final String SECRET = "";
+    private static final String BOOSTRAP_SERVER = "127.0.0.1:9092";
+
+    private final List<String> terms = Lists.newArrayList("kafka");
 
 
     public TwitterProducer() {
@@ -39,14 +47,21 @@ public class TwitterProducer {
 
     public void run() {
         LOGGER.info("Setup");
-
-        /** Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */
-        BlockingQueue<String> msgQueue = new LinkedBlockingQueue<String>(1000);
+        /* Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */
+        BlockingQueue<String> msgQueue = new LinkedBlockingQueue<>(1000);
         // create a twitter client
         Client client = createTwitterClient(msgQueue);
         // Attempts to establish a connection.
         client.connect();
         // create a kafka producer
+        KafkaProducer<String, String> producer = createKafkaProducer();
+        // add shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.info("stopping application...");
+            LOGGER.info("shutting down client from twitter...");
+            client.stop();
+            LOGGER.info("application is stopped");
+        }));
         // loop to send tweets to kafka
         // on a different thread, or multiple different threads....
         while (!client.isDone()) {
@@ -59,17 +74,30 @@ public class TwitterProducer {
             }
             if (Objects.nonNull(msg)) {
                 LOGGER.info(msg);
+                producer.send(new ProducerRecord<>("twitter_tweets", null, msg), (recordMetadata, e) -> {
+                    if (Objects.nonNull(e)) {
+                        LOGGER.error("Error sending message", e);
+                    }
+                });
             }
         }
         LOGGER.info("End of application");
     }
 
+    private KafkaProducer<String, String> createKafkaProducer() {
+        Properties properties = new Properties();
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOSTRAP_SERVER);
+        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+        return new KafkaProducer<>(properties);
+    }
+
     public Client createTwitterClient(BlockingQueue<String> msgQueue) {
 
-        /** Declare the host you want to connect to, the endpoint, and authentication (basic auth or oauth) */
+        /* Declare the host you want to connect to, the endpoint, and authentication (basic auth or oauth) */
         Hosts hosebirdHosts = new HttpHosts(Constants.STREAM_HOST);
         StatusesFilterEndpoint hosebirdEndpoint = new StatusesFilterEndpoint();
-        List<String> terms = Lists.newArrayList("bitkoin");
         hosebirdEndpoint.trackTerms(terms);
 
         // These secrets should be read from a config file
@@ -82,7 +110,6 @@ public class TwitterProducer {
                 .endpoint(hosebirdEndpoint)
                 .processor(new StringDelimitedProcessor(msgQueue));
 
-        Client hosebirdClient = builder.build();
-        return hosebirdClient;
+        return builder.build();
     }
 }
