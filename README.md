@@ -26,9 +26,9 @@ kafka-topics --bootstrap-server 127.0.0.1:9092 --create --topic twitter_tweets -
     - min.insync.replicas=2 at least 2 ISR (including leader) must respond they have data
 
 ### Producers `retries`
-- by default 0, an be Integer.MAX_VALUE
+- by default 0, can be Integer.MAX_VALUE
 - in kafka<0.11 to keep ordering in retries set `max.in.flight.requests.per.connection` to 1 (by default 5)
 
 ### Idempotent Producer 
- sends msg id, with id kafka broker understands that this msg s already committed before.
+ sends msg id, with this sent id kafka broker understands that this msg is already committed before.
  
