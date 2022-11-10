@@ -1,5 +1,4 @@
-For windows os
-
+### For windows os
 
 Open cmd and start Zookeeper:
 ```
@@ -19,3 +18,17 @@ To create kafka topic with name `twitter_tweets` on CLI:
 ```
 kafka-topics --bootstrap-server 127.0.0.1:9092 --create --topic twitter_tweets --partitions 6 --replication-factor 1
 ```
+### Producers `acks`
+
+- acks=0 (No response is required) possibly loss data
+- acks=1 (Leader response is requested, if an ask is not received, the producer may retry)
+- acks=all (Leader + Replica ack requested) latency and safety, no data loss -
+    - min.insync.replicas=2 at least 2 ISR (including leader) must respond they have data
+
+### Producers `retries`
+- by default 0, an be Integer.MAX_VALUE
+- in kafka<0.11 to keep ordering in retries set `max.in.flight.requests.per.connection` to 1 (by default 5)
+
+### Idempotent Producer 
+ sends msg id, with id kafka broker understands that this msg s already committed before.
+ 
