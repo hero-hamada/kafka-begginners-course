@@ -1,4 +1,4 @@
-package com.epam.kafkabegginers.kafka.tutorial1;
+package kafka.tutorial1;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -11,10 +11,10 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
-public class ConsumerDemo {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerDemo.class.getName());
+public class ConsumerDemoGroups {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerDemoGroups.class.getName());
     private static final String BOOSTRAP_SERVER = "127.0.0.1:9092";
-    private static final String GROUP_ID = "my-fourth-app";
+    private static final String GROUP_ID = "my-fifth-app";
 
     public static void main(String[] args) {
         String topic = "first_topic";
