@@ -32,9 +32,9 @@ public class TwitterProducer {
     private static final String TOKEN = "";
     private static final String SECRET = "";
     private static final String BOOSTRAP_SERVER = "127.0.0.1:9092";
+    private static final String TOPIC = "twitter_tweets";
 
     private final List<String> terms = Lists.newArrayList("kafka");
-
 
     public TwitterProducer() {
     }
@@ -73,7 +73,7 @@ public class TwitterProducer {
             }
             if (Objects.nonNull(msg)) {
                 LOGGER.info(msg);
-                producer.send(new ProducerRecord<>("twitter_tweets", null, msg), (recordMetadata, e) -> {
+                producer.send(new ProducerRecord<>(TOPIC, null, msg), (recordMetadata, e) -> {
                     if (Objects.nonNull(e)) {
                         LOGGER.error("Error sending message", e);
                     }
